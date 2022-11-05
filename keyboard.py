@@ -1,59 +1,49 @@
 from aiogram import types
 
 
-def StartKeyboard():
-    kb = \
+def StartKeyBoard():
+    KeyBoard = \
     [
         [
-            types.KeyboardButton('Деньги💲')
-        ],
-
-        [
-        types.KeyboardButton('Прочее📁'),
-        types.KeyboardButton('Помощь👨‍💻')
-        ]
-    ]
-
-    return types.ReplyKeyboardMarkup(
-        keyboard=kb,
-        resize_keyboard=True
-    )
-
-
-def UserBalance():
-    kb = \
-    [
-        [
-            types.InlineKeyboardButton('Новая прибыль', callback_data='profit')
+            types.KeyboardButton('Курс Валют📈')
         ],
         [
-            types.InlineKeyboardButton('Новые Затраты', callback_data='expense')
-        ]
+            types.KeyboardButton('Другое🗄')
+        ]        
     ]
 
-    return types.InlineKeyboardMarkup(inline_keyboard=kb)
+    return types.ReplyKeyboardMarkup(keyboard=KeyBoard, resize_keyboard=True)
 
 
-def UserSettings():
-    kb = \
+def AdminKeyBoard():
+    KeyBoard = \
     [
         [
-            types.InlineKeyboardButton('Получить статистику📒', callback_data='state')
-        ]
-    ]
-
-    return types.InlineKeyboardMarkup(inline_keyboard=kb)
-
-
-def AdminKeyboards():
-    kb = \
-    [
-        [
-            types.InlineKeyboardButton('Рассылка сообщения', callback_data='distribution')
+            types.KeyboardButton('Добавить валюту➕'),
+            types.KeyboardButton('Удалить валюту➖')
         ],
         [
-            types.InlineKeyboardButton('Выход', callback_data='out')
+            types.KeyboardButton('Рассылка🗣')
+        ],
+        [
+            types.KeyboardButton('Курс Валют📈')
         ]
     ]
 
-    return types.InlineKeyboardMarkup(inline_keyboard=kb)
+    return types.ReplyKeyboardMarkup(keyboard=KeyBoard, resize_keyboard=True)
+
+
+def OtherKeyBoard():
+    KeyBoard = \
+    [
+        [
+            types.InlineKeyboardButton('Помощь', url='https://t.me/kuslovick')
+        ],
+        [
+            types.InlineKeyboardButton('Канал', url='https://t.me/reattery')
+        ]
+    ]
+
+    return types.InlineKeyboardMarkup(inline_keyboard=KeyBoard)
+
+

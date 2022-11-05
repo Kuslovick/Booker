@@ -1,62 +1,80 @@
-import sqlite3
+import requests
 
 from base.charts import connect, cursor
+from bs4 import BeautifulSoup 
+from config import headers
 
 
-def UserRegister(User):
+def RegisterData(user):
+    res = cursor.execute('SELECT * FROM Users WHERE id = ?', (user,)).fetchone()
+
+    if res is not None:
+        pass
+
+    else:
+        cursor.execute('INSERT INTO Users VALUES(?)', (user,))
+        connect.commit() 
+
+
+def UsersData():
+    return cursor.execute('SELECT * FROM Users').fetchall()
+
+
+def AddWellData(code, name, url):
+    res = cursor.execute('SELECT * FROM Articles WHERE code = ?', (code,)).fetchone()
+
     try:
-        res = cursor.execute(f'SELECT * FROM Users WHERE id = {User}').fetchone()
-
         if res is not None:
-            return 'Вы уже добавлены в базу данных'
+            return 'Эта валюта уже добавлена'
 
         else:
-            cursor.execute('INSERT INTO Users VALUES (?, ?)', (User, 0))
+            cursor.execute('INSERT INTO Articles VALUES(?, ?, ?, ?)', (code, name, url, None,))
             connect.commit()
 
-            return 'Вы успешно добавлены в базу данных!'
+            PriceWellsData()
 
-    except sqlite3.ProgrammingError:
+            return 'Готово'
+
+    except:
         return 'Ошибка'
 
 
-def UserMoney(User):
-    try:
-        return cursor.execute(f'SELECT balance FROM Users WHERE id = {User}').fetchone()[0]
+def DelWellData(code):
+    res = cursor.execute('SELECT * FROM Articles WHERE code = ?', (code,)).fetchone()
 
-    except sqlite3.ProgrammingError:
+    try:
+        if res is not None:
+
+            cursor.execute('DELETE FROM Articles WHERE code = ?', (code,))
+            connect.commit()
+
+            return 'Готово'
+
+        else:
+            return 'Этой валюты нет'
+
+    except:
         return 'Ошибка'
 
 
-def UserProfit(User, Money):
-    try:
-        cursor.execute(f'UPDATE Users SET balance = balance + {Money} WHERE id = {User}')
+def PriceWellsData():
+    print('START')
+
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36'}
+    
+    for url in cursor.execute('SELECT url FROM Articles').fetchall():
+        page = requests.get(url[0], headers=headers)
+        soup = BeautifulSoup(page.content, 'html.parser')
+        well = soup.findAll("span", {"class": "DFlfde", "class": "SwHCTb", "data-precision": 2})
+            
+        cursor.execute(f'UPDATE Articles SET price = ? WHERE url = ?', (str(well[0].text), url[0],) )
         connect.commit()
 
-    except sqlite3.ProgrammingError:
-        return 'Ошибка'
 
+def WellsData():
+    result = ''
 
-def UserExpense(User, Money):
-    try:
-        cursor.execute(f'UPDATE Users SET balance = balance - {Money} WHERE id = {User}')
-        connect.commit()
-
-    except sqlite3.ProgrammingError:
-        return 'Ошибка'
-
-
-def UserState(User):
-    try:
-        return cursor.execute(f'SELECT * FROM User WHERE id = {User}').fetchall()[0][0]
-
-    except sqlite3.ProgrammingError:
-        return 'Ошибка'
-
-
-def AllUsers():
-    try:
-        return cursor.execute(f'SELECT id FROM Users').fetchall()
-
-    except sqlite3.ProgrammingError:
-        print('Error')
+    for code, name, price in cursor.execute('SELECT code, name, price FROM Articles').fetchall():
+        result += f'{str(code)}   {str(name)}   {str(price)}\n\n'
+    
+    return result
